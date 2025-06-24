@@ -79,9 +79,12 @@ def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_vola
     acwi_weights = np.arange(0.5, 0.91, 0.05)
     us_weights_in_acwi = np.arange(0.5, 0.91, 0.05)
 
-    optimal_ow_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
-    vol_change_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
-    tracking_error_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
+    acwi_labels = (acwi_weights * 100).round(0)
+    us_labels = (us_weights_in_acwi * 100).round(0)
+
+    optimal_ow_matrix = pd.DataFrame(index=us_labels, columns=acwi_labels)
+    vol_change_matrix = pd.DataFrame(index=us_labels, columns=acwi_labels)
+    tracking_error_matrix = pd.DataFrame(index=us_labels, columns=acwi_labels)
 
     for acwi_weight in acwi_weights:
         for us_weight in us_weights_in_acwi:
@@ -100,7 +103,7 @@ def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_vola
 
     for df in [optimal_ow_matrix, vol_change_matrix, tracking_error_matrix]:
         df.index.name = 'US Weight in ACWI (%)'
-        df.columns.name = 'ACWI Weight in Portfolio (%)'
+        df.columns.name = 'ACWI Weight in GP (%)'
 
     return optimal_ow_matrix, vol_change_matrix, tracking_error_matrix
 
