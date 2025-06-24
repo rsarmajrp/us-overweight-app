@@ -117,7 +117,7 @@ if st.button("Generate Matrices"):
     optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te / 100, min_vol_red / 100)
 
     st.subheader("Optimal US Overweight Matrix (%)")
-    st.dataframe(optimal_ow_matrix.style.set_caption("ACWI Weight in GP (%)"))
+    st.dataframe(optimal_ow_matrix)
 
     st.subheader("Volatility Change Matrix (%)")
     st.dataframe(vol_change_matrix)
