@@ -114,7 +114,7 @@ max_te = st.number_input("Max Tracking Error Threshold (%)", min_value=0.0, valu
 min_vol_red = st.number_input("Min Volatility Reduction Threshold (%)", value=0.025, step=0.1, format="%0.3f")
 
 if st.button("Generate Matrices"):
-    optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te / 100, min_vol_red / 100)
+    optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te / 100, -min_vol_red / 100)
 
     st.subheader("Optimal US Overweight Matrix (%)")
     st.dataframe(optimal_ow_matrix)
