@@ -21,6 +21,8 @@ def portfolio_vol(cov_matrix, weights):
     return np.sqrt(portfolio_variance)
 
 # --- CALCULATE CHANGE IN PORTFOLIO VOLATILITY AND TRACKING ERROR FOR VARIOUS US OVERWEIGHTS ---
+# This function simulates portfolio changes under incremental US overweight scenarios
+
 def analyze_us_overweight_impact(acwi_weight, us_weight_in_acwi):
     def get_acwi_geo_weights(us_weight):
         rest = 1 - us_weight
@@ -54,16 +56,18 @@ def analyze_us_overweight_impact(acwi_weight, us_weight_in_acwi):
         te = tracking_error(cov, new_portfolio_weights.values, base_portfolio_weights.values)
 
         results.append({
-            'US Overweight': ow,
-            'Volatility Change': vol_change,
-            'Tracking Error': te
+            'US Overweight': ow * 100,
+            'Volatility Change': vol_change * 100,
+            'Tracking Error': te * 100
         })
 
-    result_df = pd.DataFrame(results).set_index('US Overweight').round(6)
+    result_df = pd.DataFrame(results).set_index('US Overweight').round(2)
     return result_df
 
 # This function returns the optimal US overweight and the corresponding volatility change and tracking error.
 def get_optimal_us_overweight(ow_results, max_tracking_error_threshold, min_volatility_reduction_threshold):
+    max_tracking_error_threshold *= 100
+    min_volatility_reduction_threshold *= 100
     optimal_us_overweight = ow_results[(ow_results['Tracking Error'] <= max_tracking_error_threshold) & (ow_results['Volatility Change'] <= min_volatility_reduction_threshold)]
     if not optimal_us_overweight.empty:
         optimal_us_overweight = optimal_us_overweight.loc[optimal_us_overweight['Volatility Change'].idxmin()]
@@ -75,9 +79,9 @@ def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_vola
     acwi_weights = np.arange(0.5, 0.91, 0.05)
     us_weights_in_acwi = np.arange(0.5, 0.91, 0.05)
 
-    optimal_ow_matrix = pd.DataFrame(index=us_weights_in_acwi, columns=acwi_weights)
-    vol_change_matrix = pd.DataFrame(index=us_weights_in_acwi, columns=acwi_weights)
-    tracking_error_matrix = pd.DataFrame(index=us_weights_in_acwi, columns=acwi_weights)
+    optimal_ow_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
+    vol_change_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
+    tracking_error_matrix = pd.DataFrame(index=(us_weights_in_acwi * 100).round(0), columns=(acwi_weights * 100).round(0))
 
     for acwi_weight in acwi_weights:
         for us_weight in us_weights_in_acwi:
@@ -86,34 +90,34 @@ def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_vola
                 optimal_ow, vol_change, te = get_optimal_us_overweight(
                     ow_results, max_tracking_error_threshold, min_volatility_reduction_threshold
                 )
-                optimal_ow_matrix.at[us_weight, acwi_weight] = optimal_ow
-                vol_change_matrix.at[us_weight, acwi_weight] = vol_change
-                tracking_error_matrix.at[us_weight, acwi_weight] = te
+                optimal_ow_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = round(optimal_ow, 2)
+                vol_change_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = round(vol_change, 2)
+                tracking_error_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = round(te, 2)
             except Exception:
-                optimal_ow_matrix.at[us_weight, acwi_weight] = np.nan
-                vol_change_matrix.at[us_weight, acwi_weight] = np.nan
-                tracking_error_matrix.at[us_weight, acwi_weight] = np.nan
+                optimal_ow_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = np.nan
+                vol_change_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = np.nan
+                tracking_error_matrix.at[round(us_weight * 100), round(acwi_weight * 100)] = np.nan
 
     for df in [optimal_ow_matrix, vol_change_matrix, tracking_error_matrix]:
-        df.index.name = 'US Weight in ACWI'
-        df.columns.name = 'ACWI Weight in Portfolio'
+        df.index.name = 'US Weight in ACWI (%)'
+        df.columns.name = 'ACWI Weight in Portfolio (%)'
 
     return optimal_ow_matrix, vol_change_matrix, tracking_error_matrix
 
 # --- Streamlit User Interface ---
 st.title("US Overweight Optimization App")
 
-max_te = st.number_input("Max Tracking Error Threshold", min_value=0.0, value=0.05, step=0.01)
-min_vol_red = st.number_input("Min Volatility Reduction Threshold", value=0.0, step=0.01, format="%0.2f")
+max_te = st.number_input("Max Tracking Error Threshold (%)", min_value=0.0, value=5.0, step=0.1)
+min_vol_red = st.number_input("Min Volatility Reduction Threshold (%)", value=0.0, step=0.1, format="%0.2f")
 
 if st.button("Generate Matrices"):
-    optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te, min_vol_red)
+    optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te / 100, min_vol_red / 100)
 
-    st.subheader("Optimal US Overweight Matrix")
+    st.subheader("Optimal US Overweight Matrix (%)")
     st.dataframe(optimal_ow_matrix)
 
-    st.subheader("Volatility Change Matrix")
+    st.subheader("Volatility Change Matrix (%)")
     st.dataframe(vol_change_matrix)
 
-    st.subheader("Tracking Error Matrix")
+    st.subheader("Tracking Error Matrix (%)")
     st.dataframe(tracking_error_matrix)
