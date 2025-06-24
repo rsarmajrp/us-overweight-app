@@ -110,8 +110,8 @@ def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_vola
 # --- Streamlit User Interface ---
 st.title("US Overweight Optimization App")
 
-max_te = st.number_input("Max Tracking Error Threshold (%)", min_value=0.0, value=5.0, step=0.1)
-min_vol_red = st.number_input("Min Volatility Reduction Threshold (%)", value=0.0, step=0.1, format="%0.2f")
+max_te = st.number_input("Max Tracking Error Threshold (%)", min_value=0.0, value=0.025, step=0.1, format="%0.3f")
+min_vol_red = st.number_input("Min Volatility Reduction Threshold (%)", value=0.15, step=0.1, format="%0.2f")
 
 if st.button("Generate Matrices"):
     optimal_ow_matrix, vol_change_matrix, tracking_error_matrix = generate_optimal_us_overweight_matrix(max_te / 100, min_vol_red / 100)
