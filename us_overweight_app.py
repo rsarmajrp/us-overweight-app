@@ -77,7 +77,7 @@ def get_optimal_us_overweight(ow_results, max_tracking_error_threshold, min_vola
 # to generate matrices for optimal overweight, volatility changes, and tracking error
 def generate_optimal_us_overweight_matrix(max_tracking_error_threshold, min_volatility_reduction_threshold):
     acwi_weights = np.arange(0.5, 0.91, 0.05)
-    us_weights_in_acwi = np.arange(0.5, 0.91, 0.05)
+    us_weights_in_acwi = np.arange(0.4, 0.81, 0.05)
 
     acwi_labels = (acwi_weights * 100).round(0)
     us_labels = (us_weights_in_acwi * 100).round(0)
